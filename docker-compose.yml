@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - chiffres-data:/var/www/html/data
+
+volumes:
+  chiffres-data:

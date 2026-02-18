@@ -1,0 +1,35 @@
+<?php
+/**
+ * Configuration de l'application Chiffres (affichage et suivi tirage loto)
+ * À adapter selon l'hébergement (chemin BDD, etc.)
+ */
+
+// Répertoire de base de l'application
+define('BASE_PATH', __DIR__);
+
+// Base SQLite : fichier dans un dossier data (écriture possible sur hébergement / Raspberry Pi)
+$dataDir = BASE_PATH . '/data';
+if (!is_dir($dataDir)) {
+    mkdir($dataDir, 0755, true);
+}
+define('DB_PATH', $dataDir . '/chiffres.sqlite');
+
+// DSN PDO SQLite
+define('DB_DSN', 'sqlite:' . DB_PATH);
+
+// Fuseau horaire
+date_default_timezone_set('Europe/Paris');
+
+// Secret pour l'accès à l'interface administrateur (grille interactive, réinitialisation)
+define('ADMIN_SECRET', 'change-me');
+
+// Limites (sécurité)
+define('ADMIN_SECRET_MAX', 64);
+
+// Numéros du loto (1 à 90 par défaut)
+define('LOTO_MIN', 1);
+define('LOTO_MAX', 90);
+
+// Affichage des erreurs (à désactiver en production si besoin)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);

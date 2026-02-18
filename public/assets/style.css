@@ -1,0 +1,56 @@
+/* Chiffres — styles complémentaires Tailwind */
+
+.input {
+    @apply w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800;
+    @apply focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500;
+}
+
+@media (max-width: 640px) {
+    .input {
+        min-height: 44px;
+        font-size: 16px;
+    }
+}
+
+/* Corps de page : affichage plein écran (vidéoprojecteur) */
+.screen-display-body {
+    margin: 0;
+    min-height: 100vh;
+    overflow: hidden;
+    background: #1e293b; /* fond sombre pour projecteur */
+}
+
+/* Grille plein écran : occupe toute la place disponible */
+.screen-display {
+    background: #1e293b;
+    box-sizing: border-box;
+}
+
+.screen-display .loto-grid {
+    /* Grille 10×9 qui remplit l'espace */
+    align-content: stretch;
+    justify-content: stretch;
+}
+
+.screen-display .loto-cell {
+    /* Numéros qui s'adaptent à la taille des cases */
+    font-size: clamp(0.625rem, 2.8vmin, 4rem);
+    min-width: 0;
+    min-height: 0;
+}
+
+.screen-display .loto-num {
+    line-height: 1;
+}
+
+/* Grille loto (page admin) : cases tactiles sur mobile */
+.loto-cell {
+    min-width: 2rem;
+    min-height: 2rem;
+}
+
+@media (max-width: 640px) {
+    .loto-cell {
+        min-height: 44px;
+    }
+}
