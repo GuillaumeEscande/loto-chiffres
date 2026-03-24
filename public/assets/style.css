@@ -55,13 +55,13 @@
 }
 
 .screen-display .loto-cell {
-    /* Numéros qui s'adaptent à la taille des cases */
-    font-size: clamp(0.625rem, 2.8vmin, 4rem);
+    container-type: size;
     min-width: 0;
     min-height: 0;
 }
 
 .screen-display .loto-num {
+    font-size: 45cqi;
     line-height: 1;
 }
 
