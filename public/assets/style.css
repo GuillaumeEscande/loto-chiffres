@@ -26,6 +26,28 @@
     box-sizing: border-box;
 }
 
+/* Header bandeau pleine largeur */
+.loto-header {
+    background: #0f172a;
+    gap: 12px;
+}
+
+.loto-header-logo {
+    height: 50px;
+    width: auto;
+}
+
+.loto-header-title {
+    flex: 1;
+    text-align: center;
+    color: #facc15;
+    font-size: clamp(1.25rem, 4vw, 2.5rem);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
 .screen-display .loto-grid {
     /* Grille 10×9 qui remplit l'espace */
     align-content: stretch;

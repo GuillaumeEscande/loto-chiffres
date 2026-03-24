@@ -69,6 +69,13 @@ if ($action === 'login_check') {
     exit;
 }
 
+// API JSON : numéros tirés (pour rafraîchissement sans rechargement)
+if ($action === 'drawn_json') {
+    header('Content-Type: application/json');
+    echo json_encode(array_keys($drawModel->getDrawnNumbers()));
+    exit;
+}
+
 // Affichage écran : public, pas d'auth
 if ($action === 'display') {
     $lotoController->display();
