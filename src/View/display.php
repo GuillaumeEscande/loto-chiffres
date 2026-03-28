@@ -5,7 +5,8 @@
  */
 $pageTitle = 'Chiffres — Tirage Loto';
 $drawn     = $drawn ?? [];
-$lastDrawn = $lastDrawn ?? null;
+$lastDrawn = $drawn[0] ?? null;        // premier = plus récent
+$drawnSet  = array_flip($drawn);       // pour isset($drawnSet[$n])
 $bodyClass = 'screen-display-body';
 require __DIR__ . '/partials/header.php';
 ?>
@@ -18,14 +19,14 @@ require __DIR__ . '/partials/header.php';
         <?php for ($n = LOTO_MIN; $n <= LOTO_MAX; $n++): ?>
             <?php $isDrawn = isset($drawn[$n]); ?>
             <?php
-                if ($n === $lastDrawn)       $cellCls = 'bg-amber-400 text-slate-900';
-                elseif ($isDrawn)            $cellCls = 'bg-blue-600 text-white';
-                else                         $cellCls = 'bg-white text-slate-600 border border-slate-300 shadow-sm';
+                if ($n === $lastDrawn)            $cellCls = 'bg-amber-400 text-slate-900';
+                elseif (isset($drawnSet[$n]))     $cellCls = 'bg-blue-600 text-white';
+                else                              $cellCls = 'bg-white text-slate-600 border border-slate-300 shadow-sm';
             ?>
             <div
                 id="cell-<?= $n ?>"
                 class="loto-cell flex items-center justify-center rounded-md md:rounded-lg font-bold transition-colors min-h-0 min-w-0 <?= $cellCls ?>"
-                aria-label="Numéro <?= $n ?><?= $isDrawn ? ', tiré' : ', non tiré' ?>"
+                aria-label="Numéro <?= $n ?><?= isset($drawnSet[$n]) ? ', tiré' : ', non tiré' ?>"
             >
                 <span class="loto-num"><?= $n ?></span>
             </div>
@@ -49,7 +50,8 @@ require __DIR__ . '/partials/header.php';
         try {
             const res = await fetch('index.php?action=drawn_json');
             if (!res.ok) return;
-            const { drawn, last } = await res.json();
+            const { drawn } = await res.json();
+            const last     = drawn[0] ?? null;   // premier = plus récent
             const drawnSet = new Set(drawn);
 
             for (let n = <?= LOTO_MIN ?>; n <= <?= LOTO_MAX ?>; n++) {
@@ -59,7 +61,6 @@ require __DIR__ . '/partials/header.php';
                 const isLast  = n === last;
                 const wasLast = n === prevLast;
 
-                // Mise à jour uniquement si l'état change
                 if (isLast && !cell.classList.contains('bg-amber-400')) {
                     applyClass(cell, CLS_LAST);
                     cell.setAttribute('aria-label', 'Numéro ' + n + ', dernier tiré');

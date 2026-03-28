@@ -17,11 +17,7 @@ class LotoController
     public function display(): void
     {
         $drawn = $this->drawModel->getDrawnNumbers();
-        $lastDrawn = $this->drawModel->getLastDrawnNumber();
-        $this->render('display', [
-            'drawn'     => $drawn,
-            'lastDrawn' => $lastDrawn,
-        ]);
+        $this->render('display', ['drawn' => $drawn]);
     }
 
     /** Vue admin : grille cliquable + bouton réinitialiser. */

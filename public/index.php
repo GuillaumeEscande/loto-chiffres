@@ -69,13 +69,10 @@ if ($action === 'login_check') {
     exit;
 }
 
-// API JSON : numéros tirés (pour rafraîchissement sans rechargement)
+// API JSON : numéros tirés, ordonnés du plus récent au plus ancien
 if ($action === 'drawn_json') {
     header('Content-Type: application/json');
-    echo json_encode([
-        'drawn' => array_keys($drawModel->getDrawnNumbers()),
-        'last'  => $drawModel->getLastDrawnNumber(),
-    ]);
+    echo json_encode(['drawn' => $drawModel->getDrawnNumbers()]);
     exit;
 }
 

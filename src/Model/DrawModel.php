@@ -13,20 +13,16 @@ class DrawModel
 {
     public function __construct(private PDO $pdo) {}
 
-    /** Liste des numéros actuellement tirés (clés = numéros). */
+    /**
+     * Numéros tirés, ordonnés du plus récent au plus ancien.
+     * Le premier élément est le dernier numéro saisi.
+     *
+     * @return int[]
+     */
     public function getDrawnNumbers(): array
     {
-        $st = $this->pdo->query("SELECT num FROM drawn_numbers ORDER BY num");
-        $rows = $st->fetchAll(PDO::FETCH_COLUMN);
-        return array_fill_keys(array_map('intval', $rows), true);
-    }
-
-    /** Dernier numéro tiré (selon drawn_at puis rowid), ou null si aucun. */
-    public function getLastDrawnNumber(): ?int
-    {
-        $st = $this->pdo->query("SELECT num FROM drawn_numbers ORDER BY drawn_at DESC, rowid DESC LIMIT 1");
-        $row = $st->fetchColumn();
-        return $row !== false ? (int) $row : null;
+        $st = $this->pdo->query("SELECT num FROM drawn_numbers ORDER BY drawn_at DESC, rowid DESC");
+        return array_map('intval', $st->fetchAll(PDO::FETCH_COLUMN));
     }
 
     /** Vérifie si un numéro est tiré. */

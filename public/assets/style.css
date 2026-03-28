@@ -65,14 +65,37 @@
     line-height: 1;
 }
 
-/* Grille loto (page admin) : cases tactiles sur mobile */
-.loto-cell {
-    min-width: 2rem;
-    min-height: 2rem;
+/* Page admin : plein écran sans scroll */
+.admin-body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    background: #f8fafc;
 }
 
-@media (max-width: 640px) {
-    .loto-cell {
-        min-height: 44px;
-    }
+/* Grille admin : cases qui s'adaptent à la taille disponible */
+.admin-grid .loto-cell {
+    container-type: size;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.admin-grid .loto-cell span {
+    /* min() prend la plus petite des deux dimensions : largeur ou hauteur */
+    font-size: min(58cqi, 78cqb);
+    line-height: 1;
+}
+
+/* Badges historique : s'adaptent à la hauteur disponible */
+.admin-history-badge {
+    container-type: size;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.admin-history-badge span.num {
+    font-size: min(58cqi, 78cqb);
+    line-height: 1;
 }
