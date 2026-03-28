@@ -48,6 +48,13 @@
     white-space: nowrap;
 }
 
+.loto-header-partie {
+    font-size: 0.65em;
+    font-weight: 600;
+    opacity: 0.85;
+    letter-spacing: 0.02em;
+}
+
 .screen-display .loto-grid {
     /* Grille 10×9 qui remplit l'espace */
     align-content: stretch;

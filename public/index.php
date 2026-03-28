@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 /**
  * Point d'entrée : affichage écran (public) et administration (authentification par secret).
- * - action=display (défaut) : grille lecture seule, rafraîchissement auto 1 s.
- * - action=login / login_check / logout / admin : espace admin (secret en config).
  */
 session_start();
 
@@ -16,9 +14,9 @@ require_once $projectRoot . '/inc/db.php';
 require_once $projectRoot . '/src/functions.php';
 
 spl_autoload_register(static function (string $class): void {
-    $prefix = 'App\\';
+    $prefix  = 'App\\';
     $baseDir = dirname(__DIR__) . '/src/';
-    $len = strlen($prefix);
+    $len     = strlen($prefix);
     if (strncmp($prefix, $class, $len) !== 0) {
         return;
     }
@@ -33,8 +31,9 @@ if (!isset($pdo)) {
     die('Erreur : base de données non initialisée.');
 }
 
-$drawModel = new \App\Model\DrawModel($pdo);
-$lotoController = new \App\Controller\LotoController($drawModel);
+$drawModel      = new \App\Model\DrawModel($pdo);
+$partyModel     = new \App\Model\PartyModel($pdo);
+$lotoController = new \App\Controller\LotoController($drawModel, $partyModel);
 
 $action = $_POST['action'] ?? $_GET['action'] ?? 'display';
 
@@ -53,7 +52,7 @@ if ($action === 'login') {
         exit;
     }
     $loginError = isset($_GET['error']);
-    $pageTitle = 'Chiffres — Connexion';
+    $pageTitle  = 'Chiffres — Connexion';
     require $projectRoot . '/src/View/auth/login.php';
     exit;
 }
@@ -69,10 +68,14 @@ if ($action === 'login_check') {
     exit;
 }
 
-// API JSON : numéros tirés, ordonnés du plus récent au plus ancien
+// API JSON : numéros tirés + numéro de partie (pour rafraîchissement sans rechargement)
 if ($action === 'drawn_json') {
     header('Content-Type: application/json');
-    echo json_encode(['drawn' => $drawModel->getDrawnNumbers()]);
+    $party = $partyModel->getActive();
+    echo json_encode([
+        'drawn'  => $drawModel->getDrawnNumbers((int) $party['id']),
+        'partie' => (int) $party['numero'],
+    ]);
     exit;
 }
 
@@ -86,8 +89,10 @@ if ($action === 'display') {
 require_admin();
 
 match ($action) {
-    'admin' => $lotoController->admin(),
-    'toggle' => $lotoController->toggle(),
-    'reset' => $lotoController->reset(),
-    default => $lotoController->admin(),
+    'admin'      => $lotoController->admin(),
+    'toggle'     => $lotoController->toggle(),
+    'reset'      => $lotoController->reset(),
+    'prev_party' => $lotoController->prevParty(),
+    'next_party' => $lotoController->nextParty(),
+    default      => $lotoController->admin(),
 };

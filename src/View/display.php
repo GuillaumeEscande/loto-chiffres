@@ -3,21 +3,24 @@
  * Vue affichage : grille des numéros du loto (blanc = non tiré, bleu = tiré).
  * Auto-rafraîchissement toutes les secondes pour écran dédié (ex. Raspberry Pi).
  */
-$pageTitle = 'Chiffres — Tirage Loto';
-$drawn     = $drawn ?? [];
-$lastDrawn = $drawn[0] ?? null;        // premier = plus récent
-$drawnSet  = array_flip($drawn);       // pour isset($drawnSet[$n])
-$bodyClass = 'screen-display-body';
+$pageTitle   = 'Chiffres — Tirage Loto';
+$drawn       = $drawn ?? [];
+$partyNumero = $partyNumero ?? 1;
+$lastDrawn   = $drawn[0] ?? null;
+$drawnSet    = array_flip($drawn);
+$bodyClass   = 'screen-display-body';
 require __DIR__ . '/partials/header.php';
 ?>
 <main class="screen-display h-screen w-screen max-w-full overflow-hidden flex flex-col">
     <header class="loto-header shrink-0 flex items-center px-3 py-1">
         <img src="assets/logo-ste-therese.png" alt="Logo Ste Thérèse" class="loto-header-logo">
-        <h1 class="loto-header-title">Loto Ste Thérèse 2026</h1>
+        <h1 class="loto-header-title">
+            Loto Ste Thérèse 2026
+            <span id="party-label" class="loto-header-partie">— Partie <span id="party-num"><?= $partyNumero ?></span></span>
+        </h1>
     </header>
     <div class="loto-grid flex-1 min-h-0 grid grid-cols-10 grid-rows-[repeat(9,minmax(0,1fr))] gap-1 md:gap-2 p-2 md:p-3">
         <?php for ($n = LOTO_MIN; $n <= LOTO_MAX; $n++): ?>
-            <?php $isDrawn = isset($drawn[$n]); ?>
             <?php
                 if ($n === $lastDrawn)            $cellCls = 'bg-amber-400 text-slate-900';
                 elseif (isset($drawnSet[$n]))     $cellCls = 'bg-blue-600 text-white';
@@ -44,15 +47,22 @@ require __DIR__ . '/partials/header.php';
         cls.split(' ').forEach(k => cell.classList.add(k));
     }
 
-    let prevLast = <?= $lastDrawn ?? 'null' ?>;
+    let prevLast   = <?= $lastDrawn ?? 'null' ?>;
+    let prevPartie = <?= $partyNumero ?>;
 
     async function refresh() {
         try {
             const res = await fetch('index.php?action=drawn_json');
             if (!res.ok) return;
-            const { drawn } = await res.json();
-            const last     = drawn[0] ?? null;   // premier = plus récent
+            const { drawn, partie } = await res.json();
+            const last     = drawn[0] ?? null;
             const drawnSet = new Set(drawn);
+
+            // Mise à jour du numéro de partie dans le titre
+            if (partie !== prevPartie) {
+                document.getElementById('party-num').textContent = partie;
+                prevPartie = partie;
+            }
 
             for (let n = <?= LOTO_MIN ?>; n <= <?= LOTO_MAX ?>; n++) {
                 const cell = document.getElementById('cell-' + n);
