@@ -17,8 +17,10 @@ class LotoController
     public function display(): void
     {
         $drawn = $this->drawModel->getDrawnNumbers();
+        $lastDrawn = $this->drawModel->getLastDrawnNumber();
         $this->render('display', [
-            'drawn' => $drawn,
+            'drawn'     => $drawn,
+            'lastDrawn' => $lastDrawn,
         ]);
     }
 

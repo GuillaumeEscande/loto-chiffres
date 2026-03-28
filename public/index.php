@@ -72,7 +72,10 @@ if ($action === 'login_check') {
 // API JSON : numéros tirés (pour rafraîchissement sans rechargement)
 if ($action === 'drawn_json') {
     header('Content-Type: application/json');
-    echo json_encode(array_keys($drawModel->getDrawnNumbers()));
+    echo json_encode([
+        'drawn' => array_keys($drawModel->getDrawnNumbers()),
+        'last'  => $drawModel->getLastDrawnNumber(),
+    ]);
     exit;
 }
 

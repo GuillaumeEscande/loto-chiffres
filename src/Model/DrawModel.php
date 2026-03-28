@@ -21,6 +21,14 @@ class DrawModel
         return array_fill_keys(array_map('intval', $rows), true);
     }
 
+    /** Dernier numéro tiré (selon drawn_at puis rowid), ou null si aucun. */
+    public function getLastDrawnNumber(): ?int
+    {
+        $st = $this->pdo->query("SELECT num FROM drawn_numbers ORDER BY drawn_at DESC, rowid DESC LIMIT 1");
+        $row = $st->fetchColumn();
+        return $row !== false ? (int) $row : null;
+    }
+
     /** Vérifie si un numéro est tiré. */
     public function isDrawn(int $num): bool
     {

@@ -4,7 +4,8 @@
  * Auto-rafraîchissement toutes les secondes pour écran dédié (ex. Raspberry Pi).
  */
 $pageTitle = 'Chiffres — Tirage Loto';
-$drawn = $drawn ?? [];
+$drawn     = $drawn ?? [];
+$lastDrawn = $lastDrawn ?? null;
 $bodyClass = 'screen-display-body';
 require __DIR__ . '/partials/header.php';
 ?>
@@ -16,9 +17,14 @@ require __DIR__ . '/partials/header.php';
     <div class="loto-grid flex-1 min-h-0 grid grid-cols-10 grid-rows-[repeat(9,minmax(0,1fr))] gap-1 md:gap-2 p-2 md:p-3">
         <?php for ($n = LOTO_MIN; $n <= LOTO_MAX; $n++): ?>
             <?php $isDrawn = isset($drawn[$n]); ?>
+            <?php
+                if ($n === $lastDrawn)       $cellCls = 'bg-amber-400 text-slate-900';
+                elseif ($isDrawn)            $cellCls = 'bg-blue-600 text-white';
+                else                         $cellCls = 'bg-white text-slate-600 border border-slate-300 shadow-sm';
+            ?>
             <div
                 id="cell-<?= $n ?>"
-                class="loto-cell flex items-center justify-center rounded-md md:rounded-lg font-bold transition-colors min-h-0 min-w-0 <?= $isDrawn ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 border border-slate-300 shadow-sm' ?>"
+                class="loto-cell flex items-center justify-center rounded-md md:rounded-lg font-bold transition-colors min-h-0 min-w-0 <?= $cellCls ?>"
                 aria-label="Numéro <?= $n ?><?= $isDrawn ? ', tiré' : ', non tiré' ?>"
             >
                 <span class="loto-num"><?= $n ?></span>
@@ -28,32 +34,47 @@ require __DIR__ . '/partials/header.php';
 </main>
 <script>
 (function() {
-    const DRAWN_CLS = 'bg-blue-600 text-white';
-    const DEFAULT_CLS = 'bg-white text-slate-600 border border-slate-300 shadow-sm';
+    const CLS_DEFAULT = 'bg-white text-slate-600 border border-slate-300 shadow-sm';
+    const CLS_DRAWN   = 'bg-blue-600 text-white';
+    const CLS_LAST    = 'bg-amber-400 text-slate-900';
+
+    function applyClass(cell, cls) {
+        [CLS_DEFAULT, CLS_DRAWN, CLS_LAST].forEach(c => c.split(' ').forEach(k => cell.classList.remove(k)));
+        cls.split(' ').forEach(k => cell.classList.add(k));
+    }
+
+    let prevLast = <?= $lastDrawn ?? 'null' ?>;
 
     async function refresh() {
         try {
             const res = await fetch('index.php?action=drawn_json');
             if (!res.ok) return;
-            const drawnNums = new Set(await res.json());
+            const { drawn, last } = await res.json();
+            const drawnSet = new Set(drawn);
 
             for (let n = <?= LOTO_MIN ?>; n <= <?= LOTO_MAX ?>; n++) {
                 const cell = document.getElementById('cell-' + n);
                 if (!cell) continue;
-                const isDrawn = drawnNums.has(n);
-                const wasDrawn = cell.classList.contains('bg-blue-600');
-                if (isDrawn === wasDrawn) continue;
+                const isDrawn = drawnSet.has(n);
+                const isLast  = n === last;
+                const wasLast = n === prevLast;
 
-                if (isDrawn) {
-                    DEFAULT_CLS.split(' ').forEach(c => cell.classList.remove(c));
-                    DRAWN_CLS.split(' ').forEach(c => cell.classList.add(c));
-                    cell.setAttribute('aria-label', 'Numéro ' + n + ', tiré');
-                } else {
-                    DRAWN_CLS.split(' ').forEach(c => cell.classList.remove(c));
-                    DEFAULT_CLS.split(' ').forEach(c => cell.classList.add(c));
-                    cell.setAttribute('aria-label', 'Numéro ' + n + ', non tiré');
+                // Mise à jour uniquement si l'état change
+                if (isLast && !cell.classList.contains('bg-amber-400')) {
+                    applyClass(cell, CLS_LAST);
+                    cell.setAttribute('aria-label', 'Numéro ' + n + ', dernier tiré');
+                } else if (!isLast && wasLast) {
+                    applyClass(cell, isDrawn ? CLS_DRAWN : CLS_DEFAULT);
+                    cell.setAttribute('aria-label', 'Numéro ' + n + (isDrawn ? ', tiré' : ', non tiré'));
+                } else if (!isLast) {
+                    const shouldBeDrawn = cell.classList.contains('bg-blue-600');
+                    if (isDrawn !== shouldBeDrawn) {
+                        applyClass(cell, isDrawn ? CLS_DRAWN : CLS_DEFAULT);
+                        cell.setAttribute('aria-label', 'Numéro ' + n + (isDrawn ? ', tiré' : ', non tiré'));
+                    }
                 }
             }
+            prevLast = last;
         } catch (e) { /* silently retry next tick */ }
     }
 
